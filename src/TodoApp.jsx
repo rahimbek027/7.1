@@ -1,6 +1,6 @@
-
 import React, { useReducer, useState } from 'react';
-import './TodoApp.css'; 
+import './TodoApp.css';
+import Modal from './Modal';
 
 const initialState = {
   todos: [],
@@ -27,6 +27,8 @@ const reducer = (state, action) => {
 const TodoApp = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [inputValue, setInputValue] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [todoToDelete, setTodoToDelete] = useState(null);
 
   const handleAddTodo = () => {
     if (inputValue.trim()) {
@@ -35,27 +37,54 @@ const TodoApp = () => {
     }
   };
 
+  const handleDeleteTodo = (id) => {
+    setTodoToDelete(id);
+    setModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    dispatch({ type: 'DELETE_TODO', payload: todoToDelete });
+    setModalOpen(false);
+    setTodoToDelete(null);
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter') {
+      handleAddTodo();
+    }
+  };
+
   return (
     <div className="todo-container">
       <h1>Todo List</h1>
-      <input
-        type="text"
-        value={inputValue}
-        onChange={(e) => setInputValue(e.target.value)}
-        placeholder="Add a new todo"
-      />
-      <button onClick={handleAddTodo}>Add</button>
-      <ul>
-        {state.todos.map(todo => (
+      <div className="input-container">
+        <input
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown} 
+          placeholder="Add a new todo"
+        />
+        <button onClick={handleAddTodo}>Add</button>
+      </div>
+      <ul className="todo-list">
+        {state.todos.map((todo, index) => (
           <li key={todo.id} className={todo.liked ? 'liked' : ''}>
-            <span>{todo.text}</span>
-            <button onClick={() => dispatch({ type: 'TOGGLE_LIKE', payload: todo.id })}>
-              {todo.liked ? 'Unlike' : 'Like'}
-            </button>
-            <button onClick={() => dispatch({ type: 'DELETE_TODO', payload: todo.id })}>Delete</button>
+            {todo.text}
+            <div className="actions-container">
+              <button onClick={() => dispatch({ type: 'TOGGLE_LIKE', payload: todo.id })}>
+                {todo.liked ? 'Unlike' : 'Like'}
+              </button>
+              <button onClick={() => handleDeleteTodo(todo.id)}>Delete</button>
+            </div>
           </li>
         ))}
       </ul>
+      <Modal 
+        isOpen={modalOpen} 
+        onClose={() => setModalOpen(false)} 
+        onConfirm={confirmDelete} 
+      />
     </div>
   );
 };
