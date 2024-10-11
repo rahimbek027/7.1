@@ -1,6 +1,6 @@
-// src/TodoApp.jsx
+
 import React, { useReducer, useState } from 'react';
-import './TodoApp.css'; // CSS faylini qo'shishingiz mumkin
+import './TodoApp.css'; 
 
 const initialState = {
   todos: [],
